@@ -1,0 +1,22 @@
+spring.application.name=DiscordVagas
+spring.datasource.url= ${DATASOURCE_URL}
+
+# 2. Credenciais de Acesso do Administrador
+spring.datasource.username=${DATASOURCE_USERNAME}
+spring.datasource.password=${DATASOURCE_PASSWORD}
+
+# 3. Driver do PostgreSQL
+spring.datasource.driver-class-name=org.postgresql.Driver
+
+# 4. Estratégia de Criação/Atualização das Tabelas (Hibernate)
+spring.jpa.hibernate.ddl-auto=update
+
+# 5. Propriedades Extras do JPA/Hibernate
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+# 6. Integrações Externas
+
+# Substitua os valores fixos por referências às variáveis de ambiente
+gemini.api.key=${GEMINI_API_KEY}
+discord.webhook.url=${DISCORD_WEBHOOK_URL}
