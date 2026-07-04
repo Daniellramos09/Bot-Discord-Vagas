@@ -6,7 +6,7 @@ A busca por oportunidades de estágio na área de tecnologia pode ser exaustiva.
 ## 💡 A Solução
 Para otimizar o meu tempo e o dos meus colegas, desenvolvi este bot. A aplicação atua como um curador automático de oportunidades: Todos os dias, exatamente à meia-noite, o sistema entra em ação. Ele mapeia grupos e canais do Telegram focados em tecnologia, filtra rigorosamente apenas oportunidades de Estágio em São Paulo (Capital e região) e utiliza a inteligência artificial do Google Gemini para ler, processar e extrair as informações mais cruciais de cada vaga. Por fim, o bot envia um resumo limpo e formatado diretamente para um servidor do Discord através de um Webhook.
 
-Este projeto nasceu como uma solução para o dia a dia e evoluiu de forma tão robusta que recebeu nota máxima pela banca avaliadora na Fatec, validando a arquitetura e o impacto da aplicação.
+
 
 ## 🛠️ Tecnologias e Arquitetura (Por que as escolhi?)
 O projeto foi construído com foco em resiliência, automação de ponta a ponta e boas práticas de engenharia de software, simulando um ambiente de produção real:
