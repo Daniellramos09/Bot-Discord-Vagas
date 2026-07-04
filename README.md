@@ -30,6 +30,10 @@ Desenvolver este sistema permitiu-me aplicar conceitos vitais para um estagiári
 - **Infraestrutura e Cloud**: Configuração de servidores Linux, gestão de chaves SSH e deploy de contentores na AWS.
 - **Segurança**: Gestão de variáveis de ambiente (.env) para proteger chaves de API, credenciais de banco de dados e URLs de Webhooks em produção.
 
+
+<img width="1473" height="521" alt="image" src="https://github.com/user-attachments/assets/962c2ad7-f96d-460f-a5b0-04bad676f4df" />
+
+
 ---
 
 ## 📝 Configuração (Para Desenvolvedores)
