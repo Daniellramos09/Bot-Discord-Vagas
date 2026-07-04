@@ -5,6 +5,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -35,6 +37,8 @@ import java.util.List;
 @Service
 public class TelegramCafeinaScraper implements VagaScraper {
 
+    private static final Logger logger = LoggerFactory.getLogger(TelegramCafeinaScraper.class);
+
     // Lista escalável: adicione quantos canais quiser aqui!
     private static final List<String> CANAIS_TELEGRAM = List.of(
             "https://t.me/s/CafeinaVagas",
@@ -48,147 +52,229 @@ public class TelegramCafeinaScraper implements VagaScraper {
             "https://t.me/s/vagas_dev"
     );
 
+    private static final int LIMITE_VAGAS = 8;
+    private static final int TIMEOUT_MS = 15000;
+    private static final int DIAS_LIMITE_VAGA = 30;
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
+
+    // Palavras-chave para filtro de área de TI
+    private static final String[] PALAVRAS_TI = {
+            "ti", "tecnologia", "desenvolvedor", "dados", "engenharia", "cyber",
+            "projetos", "programação", "dev", "suporte", "engineering", "engineer",
+            "technology", "developer", "software", "data", "it ", "backend", "frontend", "cloud"
+    };
+
+    // Palavras-chave para cargo de estágio
+    private static final String[] PALAVRAS_ESTAGIO = {
+            "estágio", "estagio", "estagiário", "estagiario", "internship", "intern"
+    };
+
+    // Palavras-chave para lista negra (falsos positivos)
+    private static final String[] PALAVRAS_FALSO_POSITIVO = {
+            "administrativo", "administração", "recepção", "vendas", "atendimento"
+    };
+
+    // Palavras-chave para localização São Paulo
+    private static final String[] PALAVRAS_SAO_PAULO = {
+            "são paulo", "sao paulo", "#sp", "conceição", "faria lima", "paulista",
+            "vila olímpia", "berrini", "morumbi", "tatuapé", "suzano"
+    };
+
+    // Palavras-chave para trabalho remoto
+    private static final String[] PALAVRAS_REMOTO = {
+            "#remoto", "remoto"
+    };
+
     @Override
     public List<Vaga> buscarVagas() {
         List<Vaga> vagas = new ArrayList<>();
-        int limiteVagas = 8; // A sua trava de segurança
 
-        // Criamos um rótulo para o laço principal
         loopCanais:
         for (String urlCanal : CANAIS_TELEGRAM) {
             try {
-                Document doc = Jsoup.connect(urlCanal)
-                        .userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-                        .timeout(15000)
-                        .get();
-
+                Document doc = conectarAoCanal(urlCanal);
                 Elements messageElements = doc.select(".tgme_widget_message");
 
                 for (Element messageElement : messageElements) {
                     try {
-                        Element textElement = messageElement.selectFirst(".tgme_widget_message_text");
-                        Element dateElement = messageElement.selectFirst(".tgme_widget_message_date");
-
-                        if (textElement == null || dateElement == null) {
-                            continue;
-                        }
-
-                        // --- URL REAL DA VAGA (botão inline > link no texto) ---
-                        Element botaoInline = messageElement.selectFirst(".tgme_widget_message_inline_keyboard .tgme_widget_message_inline_button");
-                        Element linkNoTexto = textElement.selectFirst("a[href]");
-                        String urlVagaReal;
-
-                        if (botaoInline != null) {
-                            urlVagaReal = botaoInline.attr("href");
-                        } else if (linkNoTexto != null) {
-                            urlVagaReal = linkNoTexto.attr("href");
-                        } else {
-                            // Não há link de vaga nessa mensagem — pula
-                            continue;
-                        }
-
-                        if (urlVagaReal.isEmpty()) {
-                            continue;
-                        }
-
-                        // --- VALIDAÇÃO DE TEMPO (30 dias) ---
-                        Element timeElement = dateElement.selectFirst("time");
-                        if (timeElement != null) {
-                            String dataHoraTelegram = timeElement.attr("datetime");
-                            if (!dataHoraTelegram.isEmpty()) {
-                                java.time.OffsetDateTime dataDaVaga = java.time.OffsetDateTime.parse(dataHoraTelegram);
-                                java.time.OffsetDateTime limiteDeTempo = java.time.OffsetDateTime.now().minusDays(30);
-
-                                if (dataDaVaga.isBefore(limiteDeTempo)) {
-                                    continue;
-                                }
-                            }
-                        }
-                        // ------------------------------------
-
-                        String textoCompleto = textElement.text();
-
-                        if (textoCompleto.isEmpty()) {
-                            continue;
-                        }
-
-                        String[] linhas = textoCompleto.split("\n");
-                        String titulo = linhas[0].trim();
-                        String descricaoBruta = textoCompleto;
-
-                        String textoLower = textoCompleto.toLowerCase();
-
-                        // 1. É da área de TI? (PT + EN, para cobrir vagas de multinacionais)
-                        boolean isTI = textoLower.matches(".*\\bti\\b.*") || textoLower.contains("tecnologia") ||
-                                textoLower.contains("desenvolvedor") || textoLower.contains("dados") ||
-                                textoLower.contains("engenharia") || textoLower.contains("cyber") ||
-                                textoLower.contains("projetos") || textoLower.contains("programação") ||
-                                textoLower.contains("dev") || textoLower.contains("suporte") ||
-                                textoLower.contains("engineering") || textoLower.contains("engineer") ||
-                                textoLower.contains("technology") || textoLower.contains("developer") ||
-                                textoLower.contains("software") || textoLower.contains("data") ||
-                                textoLower.contains("it ") || textoLower.contains("backend") || 
-                                textoLower.contains("frontend") || textoLower.contains("cloud");
-
-                        // 2. Qual é o Cargo? (Aceita Estágio OU Aprendiz, PT + EN)
-                        boolean isEstagio = textoLower.contains("estágio") ||
-                                textoLower.contains("estagio") ||
-                                textoLower.contains("estagiário") || // Cobre a variação da Oslo
-                                textoLower.contains("estagiario") ||
-                                textoLower.contains("internship") ||
-                                textoLower.contains("intern ");
-                        boolean isCargoAlvo = isEstagio;
-
-                        // 3. A LISTA NEGRA (Bloqueia falsos positivos de TI)
-                        boolean isFalsoPositivo = textoLower.contains("administrativo") ||
-                                textoLower.contains("administração") ||
-                                textoLower.contains("recepção") ||
-                                textoLower.contains("vendas") ||
-                                textoLower.contains("atendimento");
-
-                        // 4. Localização
-                        boolean isSaoPaulo = textoLower.contains("são paulo") ||
-                                textoLower.contains("sao paulo") || // Cobre a vaga da XP (sem acento)
-                                textoLower.matches(".*\\bsp\\b.*") ||
-                                textoLower.contains("#sp") ||
-                                textoLower.contains("conceição") || // Cobre a vaga do Itaú
-                                textoLower.contains("faria lima") ||
-                                textoLower.contains("paulista") ||
-                                textoLower.contains("vila olímpia") ||
-                                textoLower.contains("berrini") ||
-                                textoLower.contains("morumbi") ||
-                                textoLower.contains("tatuapé") ||
-                                textoLower.contains("suzano");
-
-                        boolean isRemoto = textoLower.contains("#remoto") || textoLower.matches(".*\\bremoto\\b.*");
-
-                        // O Filtro Mestre de Titânio (Com a trava !isFalsoPositivo)
-                        if (!titulo.isEmpty() && !urlVagaReal.isEmpty() && isCargoAlvo && isTI && !isFalsoPositivo && (isRemoto || isSaoPaulo)) {
-                            Vaga vaga = new Vaga(titulo, urlVagaReal, descricaoBruta);
+                        Vaga vaga = processarMensagem(messageElement);
+                        if (vaga != null) {
                             vagas.add(vaga);
-
-                            // A trava de segurança de 8 vagas
-                            if (vagas.size() >= limiteVagas) {
+                            if (vagas.size() >= LIMITE_VAGAS) {
                                 break loopCanais;
                             }
-                        } else {
-                            // Log de diagnóstico temporário — remover depois de validar os filtros
-                            System.out.println("Descartada [" + titulo + "] -> isTI=" + isTI
-                                    + " isCargoAlvo=" + isCargoAlvo + " isFalsoPositivo=" + isFalsoPositivo
-                                    + " isSaoPaulo=" + isSaoPaulo + " isRemoto=" + isRemoto);
                         }
-
                     } catch (Exception e) {
-                        System.err.println("Erro ao processar mensagem do Telegram: " + e.getMessage());
+                        logger.error("Erro ao processar mensagem do Telegram: {}", e.getMessage(), e);
                     }
                 }
-
             } catch (IOException e) {
-                System.err.println("Erro ao conectar ao canal Telegram (" + urlCanal + "): " + e.getMessage());
+                logger.error("Erro ao conectar ao canal Telegram ({}): {}", urlCanal, e.getMessage(), e);
             }
         }
 
         return vagas;
+    }
 
+    private Document conectarAoCanal(String urlCanal) throws IOException {
+        return Jsoup.connect(urlCanal)
+                .userAgent(USER_AGENT)
+                .timeout(TIMEOUT_MS)
+                .get();
+    }
+
+    private Vaga processarMensagem(Element messageElement) {
+        Element textElement = messageElement.selectFirst(".tgme_widget_message_text");
+        Element dateElement = messageElement.selectFirst(".tgme_widget_message_date");
+
+        if (textElement == null || dateElement == null) {
+            return null;
+        }
+
+        String urlVagaReal = extrairUrlVaga(messageElement, textElement);
+        if (urlVagaReal == null || urlVagaReal.isEmpty()) {
+            return null;
+        }
+
+        if (!validarTempoVaga(dateElement)) {
+            return null;
+        }
+
+        String textoCompleto = textElement.text();
+        if (textoCompleto.isEmpty()) {
+            return null;
+        }
+
+        String[] linhas = textoCompleto.split("\n");
+        String titulo = linhas[0].trim();
+        String descricaoBruta = textoCompleto;
+
+        FiltroVaga filtro = aplicarFiltros(textoCompleto);
+
+        if (filtro.passouFiltro()) {
+            return new Vaga(titulo, urlVagaReal, descricaoBruta);
+        } else {
+            logger.debug("Descartada [{}] -> {}", titulo, filtro.getMotivoRejeicao());
+            return null;
+        }
+    }
+
+    private String extrairUrlVaga(Element messageElement, Element textElement) {
+        Element botaoInline = messageElement.selectFirst(".tgme_widget_message_inline_keyboard .tgme_widget_message_inline_button");
+        Element linkNoTexto = textElement.selectFirst("a[href]");
+
+        if (botaoInline != null) {
+            return botaoInline.attr("href");
+        } else if (linkNoTexto != null) {
+            return linkNoTexto.attr("href");
+        }
+        return null;
+    }
+
+    private boolean validarTempoVaga(Element dateElement) {
+        Element timeElement = dateElement.selectFirst("time");
+        if (timeElement != null) {
+            String dataHoraTelegram = timeElement.attr("datetime");
+            if (!dataHoraTelegram.isEmpty()) {
+                java.time.OffsetDateTime dataDaVaga = java.time.OffsetDateTime.parse(dataHoraTelegram);
+                java.time.OffsetDateTime limiteDeTempo = java.time.OffsetDateTime.now().minusDays(DIAS_LIMITE_VAGA);
+                return !dataDaVaga.isBefore(limiteDeTempo);
+            }
+        }
+        return true;
+    }
+
+    private FiltroVaga aplicarFiltros(String textoCompleto) {
+        String textoLower = textoCompleto.toLowerCase();
+
+        boolean isTI = verificarAreaTI(textoLower);
+        boolean isEstagio = verificarCargoEstagio(textoLower);
+        boolean isFalsoPositivo = verificarFalsoPositivo(textoLower);
+        boolean isSaoPaulo = verificarLocalizacaoSaoPaulo(textoLower);
+        boolean isRemoto = verificarTrabalhoRemoto(textoLower);
+
+        return new FiltroVaga(isTI, isEstagio, isFalsoPositivo, isSaoPaulo, isRemoto);
+    }
+
+    private boolean verificarAreaTI(String textoLower) {
+        for (String palavra : PALAVRAS_TI) {
+            if (palavra.equals("ti")) {
+                if (textoLower.matches(".*\\bti\\b.*")) {
+                    return true;
+                }
+            } else if (textoLower.contains(palavra)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean verificarCargoEstagio(String textoLower) {
+        for (String palavra : PALAVRAS_ESTAGIO) {
+            if (textoLower.contains(palavra)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean verificarFalsoPositivo(String textoLower) {
+        for (String palavra : PALAVRAS_FALSO_POSITIVO) {
+            if (textoLower.contains(palavra)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean verificarLocalizacaoSaoPaulo(String textoLower) {
+        for (String palavra : PALAVRAS_SAO_PAULO) {
+            if (palavra.equals("sp")) {
+                if (textoLower.matches(".*\\bsp\\b.*")) {
+                    return true;
+                }
+            } else if (textoLower.contains(palavra)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean verificarTrabalhoRemoto(String textoLower) {
+        for (String palavra : PALAVRAS_REMOTO) {
+            if (palavra.equals("remoto")) {
+                if (textoLower.matches(".*\\bremoto\\b.*")) {
+                    return true;
+                }
+            } else if (textoLower.contains(palavra)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static class FiltroVaga {
+        private final boolean isTI;
+        private final boolean isEstagio;
+        private final boolean isFalsoPositivo;
+        private final boolean isSaoPaulo;
+        private final boolean isRemoto;
+
+        public FiltroVaga(boolean isTI, boolean isEstagio, boolean isFalsoPositivo, boolean isSaoPaulo, boolean isRemoto) {
+            this.isTI = isTI;
+            this.isEstagio = isEstagio;
+            this.isFalsoPositivo = isFalsoPositivo;
+            this.isSaoPaulo = isSaoPaulo;
+            this.isRemoto = isRemoto;
+        }
+
+        public boolean passouFiltro() {
+            return isEstagio && isTI && !isFalsoPositivo && (isRemoto || isSaoPaulo);
+        }
+
+        public String getMotivoRejeicao() {
+            return String.format("isTI=%s isCargoAlvo=%s isFalsoPositivo=%s isSaoPaulo=%s isRemoto=%s",
+                    isTI, isEstagio, isFalsoPositivo, isSaoPaulo, isRemoto);
+        }
     }
 }

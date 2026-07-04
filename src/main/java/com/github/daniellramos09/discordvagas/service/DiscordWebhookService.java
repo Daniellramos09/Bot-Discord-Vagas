@@ -1,6 +1,8 @@
 package com.github.daniellramos09.discordvagas.service;
 
 import com.github.daniellramos09.discordvagas.entity.Vaga;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @Service
 public class DiscordWebhookService {
+
+    private static final Logger logger = LoggerFactory.getLogger(DiscordWebhookService.class);
 
     private final RestTemplate restTemplate;
     private final String webhookUrl;
@@ -36,7 +40,7 @@ public class DiscordWebhookService {
         );
 
         // 2. --- A TRAVA DE SEGURANÇA DO DISCORD ---
-        if (content != null && content.length() > 2000) {
+        if (content.length() > 2000) {
             // Se passar do limite, corta no caractere 1995 e adiciona "..."
             content = content.substring(0, 1995) + "...";
         }
@@ -52,9 +56,9 @@ public class DiscordWebhookService {
 
         try {
             restTemplate.postForObject(webhookUrl, request, String.class);
-            System.out.println("Vaga enviada para Discord: " + vaga.getTitulo());
-        } catch (Exception e) {
-            System.err.println("Erro ao enviar vaga para Discord: " + e.getMessage());
+            logger.info("Vaga enviada para Discord: {}", vaga.getTitulo());
+        } catch (org.springframework.web.client.RestClientException e) {
+            logger.error("Erro ao enviar vaga para Discord: {}", e.getMessage(), e);
         }
     }
 }

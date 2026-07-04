@@ -1,5 +1,7 @@
 package com.github.daniellramos09.discordvagas.service;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +14,8 @@ import java.util.Map;
 
 @Service
 public class GeminiApiService {
+
+    private static final Logger logger = LoggerFactory.getLogger(GeminiApiService.class);
 
     // A URL com o nome EXATO do modelo exigido pelo Google
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent";
@@ -68,8 +72,8 @@ public class GeminiApiService {
 
             return "Erro ao gerar resumo: resposta inválida da API";
 
-        } catch (Exception e) {
-            System.err.println("Erro ao chamar API Gemini: " + e.getMessage());
+        } catch (org.springframework.web.client.RestClientException e) {
+            logger.error("Erro ao chamar API Gemini: {}", e.getMessage(), e);
             return "Erro ao gerar resumo: " + e.getMessage();
         }
     }
