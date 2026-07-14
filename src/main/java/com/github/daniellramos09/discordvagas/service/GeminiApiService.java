@@ -128,4 +128,16 @@ public class GeminiApiService {
         }
     }
 
+
+    public String gerarResumoCertificacao(String titulo, String fonte) {
+        String prompt = String.format(
+                "Você é um assistente focado em ajudar desenvolvedores a economizar dinheiro. " +
+                        "Acabamos de encontrar uma notícia sobre certificação ou treinamento com o seguinte título: '%s', na fonte: '%s'. " +
+                        "Faça um resumo super curto e animado (máximo 2 linhas) em português, explicando do que se trata e incentivando o usuário a conferir se há um voucher ou treinamento gratuito.",
+                titulo, fonte
+        );
+
+        return executarRequisicaoGemini(prompt);
+    }
+
 }

@@ -21,15 +21,18 @@ public class DiscordWebhookService {
     private final RestTemplate restTemplate;
     private final String webhookUrlVaga;
     private final String webhookUrlOpenSource;
+    private final String webhookUrlCertificacao;
 
 
 
     public DiscordWebhookService(RestTemplate restTemplate,
                                  @Value("${discord.webhook.url}") String webhookUrlVaga,
-                                 @Value("${discord.webhook.url.openSource:}") String webhookUrlOpenSource) {
+                                 @Value("${discord.webhook.url.openSource:}") String webhookUrlOpenSource,
+                                 @Value("${discord.webhook.url.certificacao}") String webhookUrlCertificacao) {
         this.restTemplate = restTemplate;
         this.webhookUrlVaga = webhookUrlVaga;
         this.webhookUrlOpenSource = webhookUrlOpenSource;
+        this.webhookUrlCertificacao = webhookUrlCertificacao;
     }
 
     public void enviarVaga(Vaga vaga) {
@@ -103,6 +106,42 @@ public class DiscordWebhookService {
             logger.info("Open Source enviada para Discord: {}", openSource.getTitulo());
         } catch (org.springframework.web.client.RestClientException e) {
             logger.error("Erro ao enviar Open Source para Discord: {}", e.getMessage(), e);
+        }
+    }
+
+
+    public void enviarCertificacao(com.github.daniellramos09.discordvagas.entity.Certificacao certificacao) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        String content = String.format(
+                "🎓 **Oportunidade de Certificação / Treinamento!**\n\n" +
+                        "**Fonte:** `%s`\n" +
+                        "**Título:** %s\n\n" +
+                        "🤖 **Resumo da IA:**\n%s\n\n" +
+                        "🔗 **Acesse para conferir:** %s",
+                certificacao.getFonte(),
+                certificacao.getTitulo(),
+                certificacao.getResumoAi(),
+                certificacao.getUrl()
+        );
+
+        if (content.length() > 2000) {
+            content = content.substring(0, 1995) + "...";
+        }
+
+        Map<String, Object> requestBody = Map.of(
+                "content", content,
+                "username", "Certificações Bot"
+        );
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        try {
+            restTemplate.postForObject(webhookUrlCertificacao, request, String.class);
+            logger.info("Certificação enviada para Discord: {}", certificacao.getTitulo());
+        } catch (org.springframework.web.client.RestClientException e) {
+            logger.error("Erro ao enviar Certificação para Discord: {}", e.getMessage());
         }
     }
 
