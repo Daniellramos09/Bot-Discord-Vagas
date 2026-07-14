@@ -74,7 +74,7 @@ public class GeminiApiService {
 
         } catch (org.springframework.web.client.RestClientException e) {
             logger.error("Erro ao chamar API Gemini: {}", e.getMessage(), e);
-            return "Erro ao gerar resumo: " + e.getMessage();
+            return "Erro ao gerar resumo: \"⚠\uFE0F *O modelo de IA está temporariamente sobrecarregado. Por favor, leia os detalhes completos acessando o link da vaga abaixo.*\"";
         }
     }
 
