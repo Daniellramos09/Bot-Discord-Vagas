@@ -1,6 +1,8 @@
-package com.github.daniellramos09.discordvagas.scraper;
+package com.github.daniellramos09.discordvagas.service;
 
 import com.github.daniellramos09.discordvagas.entity.Vaga;
+import com.github.daniellramos09.discordvagas.repository.VagaRepository;
+import com.github.daniellramos09.discordvagas.scraper.VagaScraper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -37,6 +39,12 @@ import java.util.List;
 @Service
 public class TelegramCafeinaScraper implements VagaScraper {
 
+    private final VagaRepository vagaRepository;
+
+    public TelegramCafeinaScraper(VagaRepository vagaRepository) {
+        this.vagaRepository = vagaRepository;
+    }
+
     private static final Logger logger = LoggerFactory.getLogger(TelegramCafeinaScraper.class);
 
     // Lista escalável: adicione quantos canais quiser aqui!
@@ -45,7 +53,7 @@ public class TelegramCafeinaScraper implements VagaScraper {
             "https://t.me/s/VagasBRTI",
             "https://t.me/s/ciadeestagios",
             "https://t.me/s/estagiosDasi",
-            "https://t.me/s/ciadetalentos",
+            "https://t.me/s/cizadetalentos",
             "https://t.me/s/sejatrainee",
             "https://t.me/s/vagasbackend",
             "https://t.me/s/vagasqa",

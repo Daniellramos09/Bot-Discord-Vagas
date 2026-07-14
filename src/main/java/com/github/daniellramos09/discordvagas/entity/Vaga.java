@@ -20,8 +20,8 @@ public class Vaga{
     @Column(columnDefinition = "TEXT")
     private String descricaoBruta;
 
-    @Column(columnDefinition = "TEXT")
-    private String resumoAi;
+        @Column(columnDefinition = "TEXT")
+        private String resumoAi;
 
     @Column(nullable = false)
     private LocalDateTime dataDescoberta;
