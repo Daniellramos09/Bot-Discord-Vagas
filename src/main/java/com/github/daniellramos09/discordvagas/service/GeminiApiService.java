@@ -77,4 +77,55 @@ public class GeminiApiService {
             return "Erro ao gerar resumo: " + e.getMessage();
         }
     }
+
+
+    public String gerarResumoOpenSource(String titulo, String descricaoBruta) {
+        String prompt = String.format(
+                "Você é um desenvolvedor sênior ajudando profissionais juniores. Leia o título e a descrição desta issue " +
+                        "do GitHub (marcada como 'good first issue') e faça um resumo direto, encorajador e conciso de no máximo 3 linhas " +
+                        "em português, explicando claramente qual é o problema e o que precisa ser feito no código para resolvê-lo.\n\n" +
+                        "Título da Issue: %s\n" +
+                        "Descrição da Issue:\n%s",
+                titulo, descricaoBruta
+        );
+
+        return executarRequisicaoGemini(prompt);
+    }
+
+    // Método privado auxiliar para evitar a repetição de código de montagem de payload JSON
+    private String executarRequisicaoGemini(String prompt) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, Object> requestBody = Map.of(
+                "contents", new Object[]{
+                        Map.of(
+                                "parts", new Object[]{
+                                        Map.of("text", prompt)
+                                }
+                        )
+                }
+        );
+
+        HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+        try {
+            URI uri = URI.create(GEMINI_API_URL + "?key=" + apiKey);
+            Map<String, Object> response = restTemplate.postForObject(uri, request, Map.class);
+
+            if (response != null && response.containsKey("candidates")) {
+                Map<String, Object> candidate = ((java.util.List<Map<String, Object>>) response.get("candidates")).get(0);
+                Map<String, Object> content = (Map<String, Object>) candidate.get("content");
+                java.util.List<Map<String, Object>> parts = (java.util.List<Map<String, Object>>) content.get("parts");
+                return (String) parts.get(0).get("text");
+            }
+
+            return "Erro ao gerar resumo: resposta inválida da API do Gemini";
+
+        } catch (org.springframework.web.client.RestClientException e) {
+            logger.error("Erro ao chamar API Gemini: {}", e.getMessage(), e);
+            return "Erro ao gerar resumo através da IA: " + e.getMessage();
+        }
+    }
+
 }
