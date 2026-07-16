@@ -1,46 +1,28 @@
 package com.github.daniellramos09.discordvagas.entity;
 
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Data;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "open_source_contribuicao")
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OpenSource {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class OpenSource extends Conteudo {
 
     @Column(name = "github_id", unique = true, nullable = false)
     private Long githubId;
-
-    @Column(nullable = false)
-    private String titulo;
-
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String url;
 
     @Column(nullable = false)
     private String repositorio;
 
     private String linguagem;
 
-    @Column(name = "resumo_ai", columnDefinition = "TEXT")
-    private String resumoAi;
+    public OpenSource() {
+    }
 
-    @Column(name = "data_publicacao")
-    private LocalDateTime dataPublicacao;
+    public Long getGithubId() { return githubId; }
+    public void setGithubId(Long githubId) { this.githubId = githubId; }
 
-    @Column(nullable = false)
-    @Builder.Default
-    private boolean enviado = false;
+    public String getRepositorio() { return repositorio; }
+    public void setRepositorio(String repositorio) { this.repositorio = repositorio; }
+
+    public String getLinguagem() { return linguagem; }
+    public void setLinguagem(String linguagem) { this.linguagem = linguagem; }
 }

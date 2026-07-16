@@ -1,9 +1,9 @@
 package com.github.daniellramos09.discordvagas.controller;
 
-import com.github.daniellramos09.discordvagas.scheduler.CursoScheduler;
-import com.github.daniellramos09.discordvagas.scheduler.HackathonScheduler;
-import com.github.daniellramos09.discordvagas.scheduler.OpenSourceScheduler;
-import com.github.daniellramos09.discordvagas.scheduler.VagaBotScheduler;
+import com.github.daniellramos09.discordvagas.domain.curso.CursoOrchestrator;
+import com.github.daniellramos09.discordvagas.domain.hackathon.HackathonOrchestrator;
+import com.github.daniellramos09.discordvagas.domain.opensource.OpenSourceOrchestrator;
+import com.github.daniellramos09.discordvagas.domain.vaga.VagaOrchestrator;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -12,22 +12,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/test")
 public class TestController {
 
-    private final VagaBotScheduler vagaBotScheduler;
-    private final OpenSourceScheduler openSourceScheduler;
-    private final CursoScheduler cursoScheduler;
-    private final HackathonScheduler hackathonScheduler;
+    private final VagaOrchestrator vagaOrchestrator;
+    private final OpenSourceOrchestrator openSourceOrchestrator;
+    private final CursoOrchestrator cursoOrchestrator;
+    private final HackathonOrchestrator hackathonOrchestrator;
 
-    public TestController(VagaBotScheduler vagaBotScheduler, OpenSourceScheduler openSourceScheduler, CursoScheduler cursoScheduler, HackathonScheduler hackathonScheduler) {
-        this.vagaBotScheduler = vagaBotScheduler;
-        this.openSourceScheduler = openSourceScheduler;
-        this.cursoScheduler = cursoScheduler;
-        this.hackathonScheduler = hackathonScheduler;
+    public TestController(VagaOrchestrator vagaOrchestrator,
+                          OpenSourceOrchestrator openSourceOrchestrator,
+                          CursoOrchestrator cursoOrchestrator,
+                          HackathonOrchestrator hackathonOrchestrator) {
+        this.vagaOrchestrator = vagaOrchestrator;
+        this.openSourceOrchestrator = openSourceOrchestrator;
+        this.cursoOrchestrator = cursoOrchestrator;
+        this.hackathonOrchestrator = hackathonOrchestrator;
     }
 
     @PostMapping("/run-scraper")
     public String runScraper() {
         try {
-            vagaBotScheduler.buscarEProcessarVagas();
+            vagaOrchestrator.execute();
             return "Scraper executado com sucesso! Verifique o console para detalhes.";
         } catch (Exception e) {
             return "Erro ao executar scraper: " + e.getMessage();
@@ -37,7 +40,7 @@ public class TestController {
     @PostMapping("/run-scraper-opensource")
     public String runScraperOpenSource() {
         try {
-            openSourceScheduler.agendarBuscaOpenSource();
+            openSourceOrchestrator.execute();
             return "Scraper executado com sucesso! Verifique o console para detalhes.";
         } catch (Exception e) {
             return "Erro ao executar scraper: " + e.getMessage();
@@ -47,7 +50,7 @@ public class TestController {
     @PostMapping("/run-scraper-curso")
     public String runScraperCurso() {
         try {
-            cursoScheduler.rotinaCursos();
+            cursoOrchestrator.execute();
             return "Scraper executado com sucesso! Verifique o console para detalhes.";
         } catch (Exception e) {
             return "Erro ao executar scraper: " + e.getMessage();
@@ -57,7 +60,7 @@ public class TestController {
     @PostMapping("/run-scraper-hackathon")
     public String runScraperHackathon() {
         try {
-            hackathonScheduler.rotinaHackathons();
+            hackathonOrchestrator.execute();
             return "Scraper executado com sucesso! Verifique o console para detalhes.";
         } catch (Exception e) {
             return "Erro ao executar scraper: " + e.getMessage();

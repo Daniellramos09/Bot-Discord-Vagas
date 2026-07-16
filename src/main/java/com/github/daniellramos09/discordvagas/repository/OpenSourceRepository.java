@@ -11,6 +11,5 @@ public interface OpenSourceRepository extends JpaRepository<OpenSource, Long> {
     // O bot vai usar isso para perguntar: "Já tenho essa issue no banco?"
     boolean existsByGithubId(Long githubId);
 
-    // O bot vai usar isso para buscar as issues que ainda não foram enviadas pro Discord
     List<OpenSource> findByEnviadoFalse();
 }

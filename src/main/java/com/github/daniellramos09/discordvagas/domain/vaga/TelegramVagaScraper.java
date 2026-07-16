@@ -1,7 +1,6 @@
-package com.github.daniellramos09.discordvagas.service;
+package com.github.daniellramos09.discordvagas.domain.vaga;
 
 import com.github.daniellramos09.discordvagas.entity.Vaga;
-import com.github.daniellramos09.discordvagas.repository.VagaRepository;
 import com.github.daniellramos09.discordvagas.scraper.VagaScraper;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -15,39 +14,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Scraper responsável por extrair vagas de estágio de múltiplos canais do Telegram.
- *
- * Este scraper conecta-se à visualização web de canais públicos do Telegram
- * e extrai informações de vagas de estágio em tecnologia, aplicando filtros rigorosos
- * para garantir que apenas vagas relevantes sejam processadas.
- *
- * <p>O processo de extração inclui:</p>
- * <ul>
- *   <li>Conexão via Jsoup iterando sobre uma lista de canais</li>
- *   <li>Extração de mensagens contendo vagas</li>
- *   <li>Filtro por palavras-chave (TI, estágio, remoto ou São Paulo/SP)</li>
- *   <li>Tratamento de erros para garantir resiliência do sistema</li>
- * </ul>
- *
- * <p><b>Nota:</b> Este projeto recebeu nota máxima pela banca avaliadora.</p>
- *
- * @author Daniel Ramos
- * @version 2.0
- * @since 2026-07-03
- */
 @Service
-public class TelegramCafeinaScraper implements VagaScraper {
+public class TelegramVagaScraper implements VagaScraper {
 
-    private final VagaRepository vagaRepository;
+    private static final Logger logger = LoggerFactory.getLogger(TelegramVagaScraper.class);
 
-    public TelegramCafeinaScraper(VagaRepository vagaRepository) {
-        this.vagaRepository = vagaRepository;
-    }
-
-    private static final Logger logger = LoggerFactory.getLogger(TelegramCafeinaScraper.class);
-
-    // Lista escalável: adicione quantos canais quiser aqui!
     private static final List<String> CANAIS_TELEGRAM = List.of(
             "https://t.me/s/CafeinaVagas",
             "https://t.me/s/VagasBRTI",
@@ -65,30 +36,25 @@ public class TelegramCafeinaScraper implements VagaScraper {
     private static final int DIAS_LIMITE_VAGA = 30;
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
 
-    // Palavras-chave para filtro de área de TI
     private static final String[] PALAVRAS_TI = {
             "ti", "tecnologia", "desenvolvedor", "dados", "engenharia", "cyber",
             "projetos", "programação", "dev", "suporte", "engineering", "engineer",
             "technology", "developer", "software", "data", "it ", "backend", "frontend", "cloud"
     };
 
-    // Palavras-chave para cargo de estágio
     private static final String[] PALAVRAS_ESTAGIO = {
             "estágio", "estagio", "estagiário", "estagiario", "internship", "intern"
     };
 
-    // Palavras-chave para lista negra (falsos positivos)
     private static final String[] PALAVRAS_FALSO_POSITIVO = {
             "administrativo", "administração", "recepção", "vendas", "atendimento"
     };
 
-    // Palavras-chave para localização São Paulo
     private static final String[] PALAVRAS_SAO_PAULO = {
             "são paulo", "sao paulo", "#sp", "conceição", "faria lima", "paulista",
             "vila olímpia", "berrini", "morumbi", "tatuapé", "suzano"
     };
 
-    // Palavras-chave para trabalho remoto
     private static final String[] PALAVRAS_REMOTO = {
             "#remoto", "remoto"
     };
