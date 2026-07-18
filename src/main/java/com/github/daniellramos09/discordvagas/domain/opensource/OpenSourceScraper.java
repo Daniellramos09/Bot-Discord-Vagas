@@ -26,7 +26,7 @@ public class OpenSourceScraper {
 
     public OpenSourceScraper(RestTemplate restTemplate,
                              ObjectMapper objectMapper,
-                             @Value("${github.language-filter:java}") String languageFilter,
+                                 @Value("${github.language-filter:java}") String languageFilter,
                              @Value("${github.max-issues-per-run:5}") int maxIssuesPerRun) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;

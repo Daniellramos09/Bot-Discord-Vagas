@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class FerramentaScheduler {
+public class    FerramentaScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(FerramentaScheduler.class);
 
