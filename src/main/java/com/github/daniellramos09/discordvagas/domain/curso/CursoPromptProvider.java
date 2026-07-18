@@ -11,7 +11,7 @@ public class CursoPromptProvider {
                         "Avalie rigorosamente se o título desta notícia descreve um curso adequado para o nosso público:\n" +
                         "Notícia: '%s'\n\n" +
                         "REGRAS DE FILTRO:\n" +
-                        "1. O curso DEVE ser nas áreas de tecnologia, programação, ciência de dados, inteligência artificial, segurança da informação (cybersecurity) ou infraestrutura/cloud/nuvem como AWS, Azure, Oracle e dentre outros.\n" +
+                        "1. O curso DEVE ser nas áreas de tecnologia, programação, ciência de dados, inteligência artificial, segurança da informação (cybersecurity) ou infraestrutura/cloud/nuvem como AWS, Azure, Oracle e dentre outros .\n" +
                         "2. O curso pode ser ONLINE/EAD ou PRESENCIAL (em São Paulo ou Grande SP).\n" +
                         "3. O público-alvo DEVE ser: alunos de Ensino Médio, ensino Técnico, Graduação/Faculdade ou pessoas já na área buscando especialização (Juniores, Plenos, ou pessoas em transição de carreira).\n" +
                         "4. Se o curso for voltado para CRIANÇAS/PÚBLICO INFANTIL (ex: robótica infantil, Scratch para crianças, desenvolvimento de games para menores de 12 anos, escola de programação infantil), responda APENAS com a palavra: IGNORAR.\n" +

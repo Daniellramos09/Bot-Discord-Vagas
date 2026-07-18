@@ -1,0 +1,42 @@
+[
+  {
+    "titulo": "Amazon Web Services (AWS) - Certificações Cloud",
+    "link": "https://aws.amazon.com/certification/",
+    "descricao": "Certificações AWS reconhecidas globalmente para profissionais de cloud computing. Inclui trilhas para Solutions Architect, Developer, SysOps Administrator e especializações em AI/ML, Security e Data Analytics.",
+    "publicoAlvo": "Profissionais de TI, desenvolvedores, arquitetos de soluções e estudantes de tecnologia que desejam validar suas competências em cloud computing.",
+    "documentacaoOficial": "https://aws.amazon.com/certification/exams/",
+    "reposEstudo": "https://github.com/Brain2life/aws-exams-preparation-guide, https://github.com/Kash1405/aws-certifications, https://github.com/keenanromain/AWS-SAA-C02-Study-Guide"
+  },
+  {
+    "titulo": "Microsoft Azure - Certificações Cloud",
+    "link": "https://azure.microsoft.com/en-us/certifications/",
+    "descricao": "Certificações Microsoft Azure que validam habilidades em computação em nuvem, inteligência artificial, segurança eDevOps. O exame AZ-900 é o ponto de entrada fundamental.",
+    "publicoAlvo": "Administradores de sistemas, desenvolvedores, engenheiros de segurança e profissionais em transição para cloud que buscam validação Microsoft.",
+    "documentacaoOficial": "https://learn.microsoft.com/en-us/certifications/",
+    "reposEstudo": "https://github.com/AzureMentor/Azure-AZ-900-Study-Guide, https://github.com/ricmmartins/guia-estudo-az900, https://github.com/shiftavenue/awesome-azure-learning"
+  },
+  {
+    "titulo": "Oracle Cloud Infrastructure (OCI) - Certificações",
+    "link": "https://www.oracle.com/cloud/certification/",
+    "descricao": "Certificações Oracle Cloud Infrastructure que validam competências em infraestrutura cloud, banco de dados, IA e segurança. Inclui AI Foundations e Cloud Infrastructure Foundations.",
+    "publicoAlvo": "DBAs, administradores de infraestrutura, desenvolvedores e arquitetos que trabalham ou pretendem trabalhar com Oracle Cloud.",
+    "documentacaoOficial": "https://docs.oracle.com/en-us/iaas/Content/Certifications.htm",
+    "reposEstudo": "https://github.com/debabrata2050/Oracle-Certificate, https://github.com/heltonricardo/estudo-certificacoes"
+  },
+  {
+    "titulo": "GitHub Foundations - Certificação",
+    "link": "https://skills.github.com/",
+    "descricao": "Certificação oficial do GitHub que valida conhecimentos fundamentais em controle de versão, GitHub Actions, fluxos de Pull Requests e colaboração em repositórios.",
+    "publicoAlvo": "Estudantes, desenvolvedores juniores e qualquer pessoa que utilize ou pretenda utilizar GitHub profissionalmente.",
+    "documentacaoOficial": "https://docs.github.com/en/get-started",
+    "reposEstudo": "https://github.com/github-education/foundations-course"
+  },
+  {
+    "titulo": "Certificações Linux (LPI / CompTIA Linux+ / LFCS)",
+    "link": "https://www.lpi.org/",
+    "descricao": "Certificações de Linux que validam competências em administração de sistemas, linha de comandos, segurança e automação. Inclui LPIC-1, LPIC-2, CompTIA Linux+ e LFCS da Linux Foundation.",
+    "publicoAlvo": "Administradores de sistemas, engenheiros DevOps, profissionais de segurança da informação e estudantes de TI que dominam ou querem dominar Linux.",
+    "documentacaoOficial": "https://www.lpi.org/our-certifications",
+    "reposEstudo": "https://github.com/caioross/Cursos-Certificados-Free"
+  }
+]

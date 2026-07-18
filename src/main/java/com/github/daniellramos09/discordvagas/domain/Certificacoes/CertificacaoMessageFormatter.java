@@ -1,19 +1,22 @@
-package com.github.daniellramos09.discordvagas.domain.curso;
+package com.github.daniellramos09.discordvagas.domain.Certificacoes;
 
 import org.springframework.stereotype.Component;
 
 @Component
-public class CursoMessageFormatter {
+public class CertificacaoMessageFormatter {
 
-    private static final String WEBHOOK_USERNAME = "Cursos & Bootcamps";
+    private static final String WEBHOOK_USERNAME = "Certificações Tech";
 
-    public String format(String titulo, String resumoAi, String url) {
+    public String format(String titulo, String resumoAi, String url,
+                         String documentacaoOficial, String reposEstudo) {
         return String.format(
-                "🚀 **Novo Bootcamp / Curso Gratuito na área!**\n\n" +
-                        "**Notícia:** %s\n\n" +
-                        "🤖 **O que a IA achou:**\n%s\n\n" +
-                        "🔗 **Inscreva-se aqui:** %s",
-                titulo, resumoAi, url
+                "🏅 **Nova Certificação no Radar!**\n\n" +
+                        "**Certificação:** %s\n\n" +
+                        "🤖 **Resumo da IA:**\n%s\n\n" +
+                        "📚 **Documentação Oficial:** %s\n" +
+                        "📂 **Repositórios de Estudo:** %s\n" +
+                        "🔗 **Saiba Mais:** %s",
+                titulo, resumoAi, documentacaoOficial, reposEstudo, url
         );
     }
 

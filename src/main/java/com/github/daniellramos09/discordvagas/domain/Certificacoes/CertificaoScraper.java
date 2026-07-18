@@ -1,95 +1,55 @@
-package com.github.daniellramos09.discordvagas.domain.curso;
+package com.github.daniellramos09.discordvagas.domain.Certificacoes;
 
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
-import org.jsoup.select.Elements;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Component
-public class CursoScraper {
+public class CertificaoScraper {
 
-    private static final Logger logger = LoggerFactory.getLogger(CursoScraper.class);
+    private static final Logger logger = LoggerFactory.getLogger(CertificaoScraper.class);
 
-    private static final String GOOGLE_NEWS_RSS =
-            "https://news.google.com/rss/search?q=(" +
-                    "\"São Paulo\" OR \"SP\" OR online OR EAD OR remoto OR imersão OR virtual OR \"free course\" OR \"online course\" OR \"international\"" +
-                    ")+(" +
-                    "tecnologia OR programação OR dados OR \"inteligência artificial\" OR segurança OR TI OR desenvolvimento OR software OR coding OR \"computer science\"" +
-                    ")+(" +
-                    "\"curso gratuito\" OR bootcamp OR bolsa OR \"free course\" OR scholarship OR \"free training\"" +
-                    ")+when:45d&hl=pt-BR&gl=BR&ceid=BR:pt-419";
+    private final ObjectMapper objectMapper;
 
+    public CertificaoScraper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
-    public List<CursoRecord> scrape() {
-        List<CursoRecord> results = new ArrayList<>();
+    public List<CertificaoRecord> scrape() {
+        List<CertificaoRecord> results = new ArrayList<>();
 
         try {
-            logger.info("-> Buscando Cursos e Bootcamps de Tech em SP...");
-            Document doc = Jsoup.connect(GOOGLE_NEWS_RSS)
-                    .userAgent("Mozilla/5.0")
-                    .parser(Parser.xmlParser())
-                    .get();
+            logger.info("-> Carregando base de dados de certificações...");
+            ClassPathResource resource = new ClassPathResource("data/certificacoes.json");
+            InputStream inputStream = resource.getInputStream();
 
-            Elements items = doc.select("item");
+            List<Map<String, String>> certificacoes = objectMapper.readValue(
+                    inputStream, new TypeReference<>() {});
 
-            for (Element item : items) {
-                String titulo = item.select("title").text();
-                String link = item.select("link").text();
-                String dataPublicacaoStr = item.select("pubDate").text();
+            for (Map<String, String> cert : certificacoes) {
+                String titulo = cert.get("titulo");
+                String link = cert.get("link");
+                String descricao = cert.get("descricao");
+                String publicoAlvo = cert.get("publicoAlvo");
+                String documentacaoOficial = cert.get("documentacaoOficial");
+                String reposEstudo = cert.get("reposEstudo");
 
-                String tituloLower = titulo.toLowerCase();
-
-                boolean isTech = tituloLower.contains("tecnologia") ||
-                        tituloLower.contains("programação") ||
-                        tituloLower.contains("programacao") ||
-                        tituloLower.contains("ti ") ||
-                        tituloLower.contains("dados") ||
-                        tituloLower.contains("dev") ||
-                        tituloLower.contains("inteligência artificial") ||
-                        tituloLower.contains("inteligencia artificial") ||
-                        tituloLower.contains("ia") ||
-                        tituloLower.contains(" ai ") ||
-                        tituloLower.contains("segurança") ||
-                        tituloLower.contains("seguranca") ||
-                        tituloLower.contains("cyber") ||
-                        tituloLower.contains("security") ||
-                        tituloLower.contains("nuvem") ||
-                        tituloLower.contains("cloud") ||
-                        tituloLower.contains("redes") ||
-                        tituloLower.contains("computação") ||
-                        tituloLower.contains("computacao");
-
-                boolean isGratuito = tituloLower.contains("gratuito") ||
-                        tituloLower.contains("bootcamp") ||
-                        tituloLower.contains("bolsa") ||
-                        tituloLower.contains("vagas") ||
-                        tituloLower.contains("grátis") ||
-                        tituloLower.contains("gratis");
-
-                boolean isParaCriancas = tituloLower.contains("kids") ||
-                        tituloLower.contains("criança") ||
-                        tituloLower.contains("crianca") ||
-                        tituloLower.contains("infantil") ||
-                        tituloLower.contains("mirim") ||
-                        tituloLower.contains("escola de programação para crianças") ||
-                        tituloLower.contains("fundamental i") ||
-                        tituloLower.contains("fundamental 1") ||
-                        tituloLower.contains("fundamental ii") ||
-                        tituloLower.contains("fundamental 2");
-
-                if (isTech && isGratuito && !isParaCriancas) {
-                    results.add(new CursoRecord(titulo, link, dataPublicacaoStr));
-                }
+                results.add(new CertificaoRecord(
+                        titulo, link, descricao, publicoAlvo,
+                        documentacaoOficial, reposEstudo));
             }
+
+            logger.info("Carregadas {} certificações da base de dados.", results.size());
         } catch (Exception e) {
-            logger.error("Erro ao buscar cursos: {}", e.getMessage());
+            logger.error("Erro ao carregar certificações: {}", e.getMessage(), e);
         }
 
         return results;

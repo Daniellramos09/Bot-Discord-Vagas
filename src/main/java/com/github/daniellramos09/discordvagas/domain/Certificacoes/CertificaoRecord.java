@@ -1,4 +1,6 @@
-package com.github.daniellramos09.discordvagas.domain.curso;
+package com.github.daniellramos09.discordvagas.domain.Certificacoes;
 
-public record CursoRecord(String titulo, String link, String dataPublicacaoStr) {
+public record CertificaoRecord(String titulo, String link, String descricao,
+                                String publicoAlvo, String documentacaoOficial,
+                                String reposEstudo) {
 }

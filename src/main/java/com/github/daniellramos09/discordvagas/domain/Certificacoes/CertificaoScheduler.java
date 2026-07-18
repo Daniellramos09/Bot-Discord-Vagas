@@ -1,19 +1,25 @@
-package com.github.daniellramos09.discordvagas.domain.curso;
+package com.github.daniellramos09.discordvagas.domain.Certificacoes;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 @Component
-public class CursoScheduler {
+public class CertificaoScheduler {
 
-    private final CursoOrchestrator orchestrator;
+    private static final Logger logger = LoggerFactory.getLogger(CertificaoScheduler.class);
 
-    public CursoScheduler(CursoOrchestrator orchestrator) {
+    private final CertificacaoOrchestrator orchestrator;
+
+    public CertificaoScheduler(CertificacaoOrchestrator orchestrator) {
         this.orchestrator = orchestrator;
     }
 
-    @Scheduled(cron = "0 0 12,18 * * *", zone = "America/Sao_Paulo")
-    public void rotinaCursos() {
+    @Scheduled(cron = "0 0 10,16 * * *", zone = "America/Sao_Paulo")
+    public void rotinaCertificacoes() {
+        logger.info("Iniciando rotina agendada: Envio de Certificações...");
         orchestrator.execute();
+        logger.info("Rotina de certificações finalizada.");
     }
 }
