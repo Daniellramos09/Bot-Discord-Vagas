@@ -1,0 +1,241 @@
+````md
+# Implementação de Novos Scrapers de Vagas
+
+## Contexto do Projeto
+
+Atue como um **Engenheiro de Software Sênior**.
+
+Estamos trabalhando em um **bot para Discord** desenvolvido em **Java com Spring Boot**, seguindo a arquitetura **Modular Monolith** e os princípios **SOLID**.
+
+O domínio atual é:
+
+```text
+domain/vaga/
+```
+
+O objetivo desta etapa é adicionar **dois novos Scrapers (buscadores de vagas)** que irão consumir APIs externas.
+
+As API Keys já estão configuradas no arquivo `application.properties`:
+
+```properties
+buscardo.vagas.jooble=${BUSCADOR_VAGAS}
+buscador.vaga.serpapi=${BUSCADOR_VAGA_SERP}
+```
+
+---
+
+# Objetivos
+
+## 🎯 1. Implementar `SerpApiVagaScraper` (GET)
+
+### Objetivo
+
+Consumir a API da **SerpApi (Google Jobs)**.
+
+### Requisitos
+
+- Criar a classe:
+
+```text
+SerpApiVagaScraper
+```
+
+- Injetar a propriedade:
+
+```properties
+buscador.vaga.serpapi
+```
+
+utilizando:
+
+```java
+@Value("${buscador.vaga.serpapi}")
+```
+
+- Utilizar **RestTemplate** para realizar uma requisição **GET**.
+
+### Endpoint
+
+```text
+https://serpapi.com/search.json
+```
+
+### Query Parameters
+
+```text
+engine=google_jobs
+q=(estágio OR júnior)+tecnologia
+location=São Paulo, State of São Paulo, Brazil
+hl=pt
+gl=br
+api_key={chave_injetada}
+```
+
+### Tratamento da Resposta
+
+Utilizar **JsonNode** (Jackson) ou **ObjectMapper** para ler o JSON.
+
+Extrair o array:
+
+```text
+jobs_results
+```
+
+De cada vaga obter:
+
+- title
+- company_name
+- location
+- share_link
+
+### Retorno esperado
+
+Retornar uma lista contendo os dados brutos das vagas.
+
+Pode ser:
+
+- Lista de Strings
+- Ou objetos simples (DTO básico)
+
+---
+
+# 🎯 2. Implementar `JoobleVagaScraper` (POST)
+
+## Objetivo
+
+Consumir a API do **Jooble**.
+
+### Criar a classe
+
+```text
+JoobleVagaScraper
+```
+
+### Injetar
+
+```properties
+buscardo.vagas.jooble
+```
+
+com:
+
+```java
+@Value("${buscardo.vagas.jooble}")
+```
+
+### Método HTTP
+
+POST
+
+### Endpoint
+
+```text
+https://br.jooble.org/api/{chave_injetada}
+```
+
+### Headers
+
+```http
+Content-Type: application/json
+```
+
+### Body
+
+```json
+{
+  "keywords": "estágio OR junior tecnologia",
+  "location": "São Paulo"
+}
+```
+
+### Tratamento da Resposta
+
+Utilizar **JsonNode** ou **ObjectMapper**.
+
+Extrair o array:
+
+```text
+jobs
+```
+
+Para cada vaga obter:
+
+- title
+- company
+- location
+- link
+
+### Retorno esperado
+
+Retornar uma lista contendo os dados brutos.
+
+---
+
+# 🎯 3. Atualizar o Maestro (`VagaOrchestrator`)
+
+Atualizar a classe:
+
+```text
+VagaOrchestrator
+```
+
+para seguir o seguinte fluxo:
+
+## Fluxo
+
+1. Chamar o método de busca do:
+
+```text
+SerpApiVagaScraper
+```
+
+2. Chamar o método de busca do:
+
+```text
+JoobleVagaScraper
+```
+
+3. Unir ambas as listas em uma única lista de vagas brutas.
+
+4. Iterar sobre todas as vagas.
+
+5. Para cada vaga:
+
+Enviar os dados crus para:
+
+- `VagaPromptProvider`
+- `GeminiClient`
+
+para validar se a vaga atende aos critérios do projeto.
+
+6. Avaliar a resposta da IA.
+
+Caso a resposta seja diferente de:
+
+```text
+IGNORAR
+```
+
+Enviar o resumo produzido pela IA para:
+
+```text
+DiscordClient
+```
+
+---
+
+# Instruções de Entrega
+
+Gerar o código Java contendo:
+
+- Implementação completa de `SerpApiVagaScraper`
+- Implementação completa de `JoobleVagaScraper`
+- Atualização da classe `VagaOrchestrator`
+
+## Requisitos técnicos
+
+- Utilizar **RestTemplate**
+- Utilizar **JsonNode** ou **ObjectMapper** do Jackson
+- Manter o princípio **SRP (Single Responsibility Principle)**
+- O `VagaOrchestrator` deve apenas orquestrar os serviços, sem conter lógica de scraping.
+````
