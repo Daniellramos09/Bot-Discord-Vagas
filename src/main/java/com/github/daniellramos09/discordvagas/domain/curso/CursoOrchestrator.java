@@ -44,10 +44,11 @@ public class CursoOrchestrator {
     }
 
     public void execute() {
-        List<CursoRecord> records = scraper.scrape();
-        ZonedDateTime dataLimite = ZonedDateTime.now().minusDays(45);
-        int cursosEnviadosNaRodada = 0;
-        int maximoPorRodada = 3;
+        try {
+            List<CursoRecord> records = scraper.scrape();
+            ZonedDateTime dataLimite = ZonedDateTime.now().minusDays(45);
+            int cursosEnviadosNaRodada = 0;
+            int maximoPorRodada = 3;
 
         for (CursoRecord record : records) {
             if (cursosEnviadosNaRodada >= maximoPorRodada) {
@@ -88,6 +89,9 @@ public class CursoOrchestrator {
             logger.info("Novo Curso Tech SP enviado: {}", record.titulo());
 
             sleep(2000);
+        }
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de cursos: {}", e.getMessage(), e);
         }
     }
 

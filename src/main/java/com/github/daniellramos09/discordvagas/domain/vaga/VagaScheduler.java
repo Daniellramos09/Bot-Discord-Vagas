@@ -18,6 +18,10 @@ public class VagaScheduler {
 
     @Scheduled(cron = "0 0 0 * * *", zone = "America/Sao_Paulo")
     public void buscarEProcessarVagas() {
-        orchestrator.execute();
+        try {
+            orchestrator.execute();
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de vagas: {}", e.getMessage(), e);
+        }
     }
 }

@@ -42,9 +42,10 @@ public class CertificacaoOrchestrator {
     }
 
     public void execute() {
-        List<CertificaoRecord> records = scraper.scrape();
-        int certificacoesEnviadasNaRodada = 0;
-        int maximoPorRodada = 3;
+        try {
+            List<CertificaoRecord> records = scraper.scrape();
+            int certificacoesEnviadasNaRodada = 0;
+            int maximoPorRodada = 3;
 
         for (CertificaoRecord record : records) {
             if (certificacoesEnviadasNaRodada >= maximoPorRodada) {
@@ -79,6 +80,9 @@ public class CertificacaoOrchestrator {
             logger.info("Nova Certificação enviada: {}", record.titulo());
 
             sleep(15000);
+        }
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de certificações: {}", e.getMessage(), e);
         }
     }
 

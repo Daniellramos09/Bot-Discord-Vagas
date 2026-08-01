@@ -17,10 +17,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/test")
-@Profile("dev")
+@Profile("!prod")
 public class TestController {
 
-    private static final Logger logger = LoggerFactory.getLogger(TestController.class);
+    public static final Logger logger = LoggerFactory.getLogger(TestController.class);
 
     private final VagaOrchestrator vagaOrchestrator;
     private final OpenSourceOrchestrator openSourceOrchestrator;
