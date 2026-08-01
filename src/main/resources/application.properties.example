@@ -20,3 +20,5 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
 # Substitua os valores fixos por referências às variáveis de ambiente
 gemini.api.key=${GEMINI_API_KEY}
 discord.webhook.url=${DISCORD_WEBHOOK_URL}
+discord.webhook.url.evento=${DISCORD_WEBHOOK_URL_EVENTO}
+buscador.vaga.serperapi=${BUSCADOR_VAGA_SERPERAPI}

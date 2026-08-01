@@ -55,9 +55,9 @@ public class CursoOrchestrator {
                 break;
             }
 
-            if (!isValidDate(record.dataPublicacaoStr(), dataLimite)) {
+           /* if (!isValidDate(record.dataPublicacaoStr(), dataLimite)) {
                 continue;
-            }
+            }*/
 
             if (repository.existsByUrl(record.link())) {
                 continue;
@@ -91,7 +91,7 @@ public class CursoOrchestrator {
         }
     }
 
-    private boolean isValidDate(String dataPublicacaoStr, ZonedDateTime dataLimite) {
+    /*private boolean isValidDate(String dataPublicacaoStr, ZonedDateTime dataLimite) {
         try {
             ZonedDateTime dataDaNoticia = ZonedDateTime.parse(dataPublicacaoStr, DateTimeFormatter.RFC_1123_DATE_TIME);
             return !dataDaNoticia.isBefore(dataLimite);
@@ -99,7 +99,7 @@ public class CursoOrchestrator {
             logger.warn("Data inválida: {}", dataPublicacaoStr);
             return false;
         }
-    }
+    }*/
 
     private boolean isBlockedByAI(String resumoAi) {
         if (resumoAi == null) return true;

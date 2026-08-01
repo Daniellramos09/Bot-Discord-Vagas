@@ -11,5 +11,6 @@ public interface VagaRepository extends JpaRepository<Vaga, Long> {
 
     boolean existsByUrl(String url);
 
+    boolean existsByTitulo(String titulo);
 
 }
