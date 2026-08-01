@@ -6,4 +6,8 @@ import java.util.List;
 public interface VagaScraper {
 
     List<Vaga> buscarVagas();
+
+    default String getNomeFonte() {
+        return this.getClass().getSimpleName();
+    }
 }

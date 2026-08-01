@@ -7,28 +7,29 @@ import com.github.daniellramos09.discordvagas.scraper.VagaScraper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class SerpApiVagaScraper implements VagaScraper {
 
     private static final Logger logger = LoggerFactory.getLogger(SerpApiVagaScraper.class);
 
-    private static final String SERP_API_URL = "https://serpapi.com/search.json";
+    // O Serper usa o endpoint de busca padrão, não existe um "/jobs" isolado nele
+    private static final String SERPER_API_URL = "https://google.serper.dev/search";
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final String apiKey;
 
     public SerpApiVagaScraper(RestTemplate restTemplate,
-                               ObjectMapper objectMapper,
-                               @Value("${buscador.vaga.serpapi}") String apiKey) {
+                             ObjectMapper objectMapper,
+                             @Value("${buscador.vaga.serpapi}") String apiKey) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
@@ -39,42 +40,51 @@ public class SerpApiVagaScraper implements VagaScraper {
         List<Vaga> vagas = new ArrayList<>();
 
         try {
-            String url = UriComponentsBuilder.fromHttpUrl(SERP_API_URL)
-                    .queryParam("engine", "google_jobs")
-                    .queryParam("q", "(estágio OR junior)+tecnologia")
-                    .queryParam("location", "São Paulo, State of São Paulo, Brazil")
-                    .queryParam("hl", "pt")
-                    .queryParam("gl", "br")
-                    .queryParam("api_key", apiKey)
-                    .toUriString();
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
 
-            logger.info("-> Buscando vagas via SerpApi (Google Jobs)...");
+            // ATENÇÃO: O Serper usa este header específico para a chave!
+            headers.set("X-API-KEY", apiKey);
 
-            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
+            Map<String, Object> body = Map.of(
+                    "q", "estágio em tecnologia São Paulo capital",
+                    "gl", "br",       // Country: Brasil
+                    "hl", "pt",       // Language: Português
+                    "tbs", "qdr:w"    // Date Range: Past week (Última semana)
+            );
 
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                JsonNode root = objectMapper.readTree(response.getBody());
-                JsonNode jobsResults = root.path("jobs_results");
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-                if (jobsResults.isArray()) {
-                    for (JsonNode job : jobsResults) {
-                        String titulo = job.path("title").asText("Sem título");
-                        String company = job.path("company_name").asText("Empresa não informada");
-                        String location = job.path("location").asText("Localização não informada");
-                        String link = job.path("share_link").asText("");
+            logger.info("-> Buscando vagas no Google via Serper.dev...");
 
-                        String descricaoBruta = String.format(
-                                "Cargo: %s\nEmpresa: %s\nLocalização: %s",
-                                titulo, company, location);
+            String responseJson = restTemplate.postForObject(SERPER_API_URL, request, String.class);
 
-                        vagas.add(new Vaga(titulo + " - " + company, link, descricaoBruta));
-                    }
-                }
-
-                logger.info("SerpApi: {} vagas encontradas.", vagas.size());
+            if (responseJson == null) {
+                logger.warn("Resposta nula da API do Serper.");
+                return vagas;
             }
+
+            JsonNode root = objectMapper.readTree(responseJson);
+
+            // O Serper devolve os links de sites como Gupy, Catho e Vagas.com dentro do array "organic"
+            JsonNode organicResults = root.path("organic");
+
+            if (organicResults.isArray()) {
+                for (JsonNode result : organicResults) {
+                    String titulo = result.path("title").asText("Sem título");
+                    String link = result.path("link").asText("");
+                    String snippet = result.path("snippet").asText("");
+
+                    // IMPORTANTE: Como é uma busca orgânica, não temos a "empresa" isolada
+                    // O seu Orchestrator/PromptProvider vai mandar o 'snippet' para o Gemini ler e entender.
+
+                    // Exemplo de adição (adapte para os campos reais da sua classe Vaga):
+                    // vagas.add(new Vaga(titulo, "Empresa no Link", "São Paulo", link, snippet));
+                }
+            }
+
         } catch (Exception e) {
-            logger.error("Erro ao buscar vagas via SerpApi: {}", e.getMessage(), e);
+            logger.error("Erro ao buscar vagas no Serper: {}", e.getMessage(), e);
         }
 
         return vagas;

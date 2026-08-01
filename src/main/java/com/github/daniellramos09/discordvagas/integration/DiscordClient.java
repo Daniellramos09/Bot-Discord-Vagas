@@ -38,8 +38,12 @@ public class DiscordClient {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            restTemplate.postForObject(webhookUrl, request, String.class);
-            logger.info("Mensagem enviada para Discord via '{}': {} caracteres", username, truncated.length());
+            String response = restTemplate.postForObject(webhookUrl, request, String.class);
+            if (response == null) {
+                logger.warn("Discord retornou resposta nula para webhook '{}'", webhookUrl);
+            } else {
+                logger.info("Mensagem enviada para Discord via '{}': {} caracteres", username, truncated.length());
+            }
         } catch (Exception e) {
             throw new IntegrationException("Erro ao enviar mensagem para Discord: " + e.getMessage(), e);
         }

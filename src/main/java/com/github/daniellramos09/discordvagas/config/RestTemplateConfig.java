@@ -18,6 +18,8 @@ public class RestTemplateConfig {
         return builder
                 .setConnectTimeout(Duration.ofMillis(connectTimeout))
                 .setReadTimeout(Duration.ofMillis(readTimeout))
+                .defaultHeader("User-Agent", "DiscordVagas/1.0 (https://github.com/daniellramos09/DiscordVagas)")
+                .defaultHeader("Accept", "application/json")
                 .build();
     }
 }

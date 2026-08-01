@@ -26,7 +26,7 @@ public class OpenSourceScraper {
 
     public OpenSourceScraper(RestTemplate restTemplate,
                              ObjectMapper objectMapper,
-                             @Value("${github.language-filter:java}") String languageFilter,
+                                 @Value("${github.language-filter:java}") String languageFilter,
                              @Value("${github.max-issues-per-run:5}") int maxIssuesPerRun) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
@@ -40,6 +40,12 @@ public class OpenSourceScraper {
         try {
             String url = String.format(GITHUB_API_URL, languageFilter);
             String responseJson = restTemplate.getForObject(url, String.class);
+
+            if (responseJson == null) {
+                logger.warn("Resposta nula da GitHub Search API para URL: {}", url);
+                return results;
+            }
+
             JsonNode root = objectMapper.readTree(responseJson);
             JsonNode items = root.path("items");
 

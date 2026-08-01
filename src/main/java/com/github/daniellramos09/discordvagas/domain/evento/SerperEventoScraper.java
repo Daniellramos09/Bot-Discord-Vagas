@@ -1,4 +1,4 @@
-package com.github.daniellramos09.discordvagas.domain.curso;
+package com.github.daniellramos09.discordvagas.domain.evento;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,40 +18,33 @@ import java.util.Map;
 import java.util.Set;
 
 @Component
-public class CursoScraper {
+public class SerperEventoScraper {
 
-    private static final Logger logger = LoggerFactory.getLogger(CursoScraper.class);
+    private static final Logger logger = LoggerFactory.getLogger(SerperEventoScraper.class);
     private static final String SERPER_API_URL = "https://google.serper.dev/search";
 
-    // Busca ampla: Traz cursos de qualquer site da internet (Udemy, Coursera, etc)
+    // Substituímos a String única por uma Lista com as 3 queries
     private static final List<String> SEARCH_QUERIES = List.of(
-            "cursos de tecnologia gratuitos",
-            "curso gratuitos de spring boot",
-            "curso gratuitos de flask python",
-            "curso gratuito de Pandas",
-            "curso gratuito de Django",
-            "curso gratuito de AWS",
-            "curso gratuito de Docker",
-            "curso gratuito de SQL",
-            "curso gratuito de IA"
-
+            "site:meetup.com (\"inteligência artificial\" OR \"dados\" OR \"software\") \"São Paulo\"",
+            "site:meetup.com (\"tecnologia\" OR \"TI\" OR \"tech\" OR \"developer\") \"São Paulo\"",
+            "site:meetup.com (\"tech\" OR \"tecnologia\" OR \"dados\" OR \"IA\") \"São Paulo\""
     );
 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final String apiKey;
 
-    public CursoScraper(RestTemplate restTemplate,
-                              ObjectMapper objectMapper,
-                              @Value("${buscador.vaga.serperapi}") String apiKey) {
+    public SerperEventoScraper(RestTemplate restTemplate,
+                               ObjectMapper objectMapper,
+                               @Value("${buscador.vaga.serperapi}") String apiKey) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
     }
 
-    public List<CursoRecord> scrape() {
-        List<CursoRecord> results = new ArrayList<>();
-        // Set para garantir que a mesma URL não seja salva duas vezes
+    public List<EventoRecord> scrape() {
+        List<EventoRecord> results = new ArrayList<>();
+        // Set é uma lista especial que bloqueia repetições automaticamente
         Set<String> linksProcessados = new HashSet<>();
 
         try {
@@ -59,15 +52,15 @@ public class CursoScraper {
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("X-API-KEY", apiKey);
 
-            logger.info("-> Buscando Cursos Gratuitos Oficiais via Serper.dev...");
+            logger.info("-> Buscando Eventos no Meetup via Serper.dev...");
 
-            // Como só tem 1 item na lista agora, o loop vai rodar apenas 1 vez (gastando só 1 crédito)
+            // Fazemos um loop (laço) para rodar as 3 pesquisas uma após a outra
             for (String query : SEARCH_QUERIES) {
                 Map<String, Object> body = Map.of(
-                        "q", query, // Puxa o "cursos de tecnologia gratuitos"
+                        "q", query,
                         "gl", "br",
                         "hl", "pt",
-                        "tbs", "qdr:w" // Recomendo voltar para "qdr:w" (última semana) para não pegar curso vencido
+                        "tbs", "qdr:w" // Resultados da última semana (se quiser 24h, mude para "qdr:d")
                 );
 
                 HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
@@ -75,8 +68,8 @@ public class CursoScraper {
                 String responseJson = restTemplate.postForObject(SERPER_API_URL, request, String.class);
 
                 if (responseJson == null) {
-                    logger.warn("Resposta nula da API do Serper para a query de cursos.");
-                    continue;
+                    logger.warn("Resposta nula da API do Serper para a query: {}", query);
+                    continue; // Pula para a próxima pesquisa se der erro
                 }
 
                 JsonNode root = objectMapper.readTree(responseJson);
@@ -86,24 +79,23 @@ public class CursoScraper {
                     for (JsonNode result : organicResults) {
                         String titulo = result.path("title").asText("Sem título");
                         String link = result.path("link").asText("");
-                        // Às vezes o Google retorna a data na chave "date", se não tiver, fica em branco
-                        String dataStr = result.path("date").asText("Recente");
 
+                        // Se a URL estiver vazia OU já estiver no nosso Set (já pegamos hoje), ignoramos
                         if (link.isBlank() || linksProcessados.contains(link)) {
                             continue;
                         }
 
-                        // Proteção: Salva a URL no Set para não repetir e adiciona na lista
+                        // Adiciona no Set para marcar que já processamos e adiciona no resultado final
                         linksProcessados.add(link);
-                        results.add(new CursoRecord(titulo, link, dataStr));
+                        results.add(new EventoRecord(titulo, link));
                     }
                 }
             }
 
-            logger.info("Serper retornou {} cursos brutos (sem repetições).", results.size());
+            logger.info("Serper retornou {} eventos brutos (sem repetições).", results.size());
 
         } catch (Exception e) {
-            logger.error("Erro ao buscar cursos no Serper: {}", e.getMessage(), e);
+            logger.error("Erro ao buscar eventos no Serper: {}", e.getMessage(), e);
         }
 
         return results;

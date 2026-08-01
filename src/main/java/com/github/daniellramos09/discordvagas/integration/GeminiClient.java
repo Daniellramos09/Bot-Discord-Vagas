@@ -10,7 +10,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
@@ -34,6 +33,7 @@ public class GeminiClient {
     public String generate(String prompt) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.set("x-goog-api-key", apiKey);
 
         Map<String, Object> requestBody = Map.of(
                 "contents", new Object[]{
@@ -48,8 +48,7 @@ public class GeminiClient {
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
 
         try {
-            URI uri = URI.create(GEMINI_API_URL + "?key=" + apiKey);
-            Map<String, Object> response = restTemplate.postForObject(uri, request, Map.class);
+            Map<String, Object> response = restTemplate.postForObject(GEMINI_API_URL, request, Map.class);
 
             if (response != null && response.containsKey("candidates")) {
                 @SuppressWarnings("unchecked")
