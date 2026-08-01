@@ -42,8 +42,9 @@ public class FerramentaOrchestrator {
     }
 
     public int execute() {
-        List<FerramentaRecord> records = scraper.scrape();
-        int ferramentasEnviadas = 0;
+        try {
+            List<FerramentaRecord> records = scraper.scrape();
+            int ferramentasEnviadas = 0;
 
         for (FerramentaRecord record : records) {
             if (repository.existsByUrl(record.url())) {
@@ -83,6 +84,10 @@ public class FerramentaOrchestrator {
         }
 
         return ferramentasEnviadas;
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de ferramentas: {}", e.getMessage(), e);
+            return 0;
+        }
     }
 
     private void sleep(long millis) {

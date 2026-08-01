@@ -45,8 +45,9 @@ public class OpenSourceOrchestrator {
     }
 
     public int execute() {
-        List<IssueRecord> records = scraper.scrape();
-        int novasIssuesEncontradas = 0;
+        try {
+            List<IssueRecord> records = scraper.scrape();
+            int novasIssuesEncontradas = 0;
 
         for (IssueRecord record : records) {
             if (repository.existsByGithubId(record.githubId())) {
@@ -80,5 +81,9 @@ public class OpenSourceOrchestrator {
         }
 
         return novasIssuesEncontradas;
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de open source: {}", e.getMessage(), e);
+            return 0;
+        }
     }
 }

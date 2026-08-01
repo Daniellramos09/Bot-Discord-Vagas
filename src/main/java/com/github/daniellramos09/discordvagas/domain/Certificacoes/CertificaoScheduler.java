@@ -18,8 +18,12 @@ public class CertificaoScheduler {
 
     @Scheduled(cron = "0 0 10,16 * * *", zone = "America/Sao_Paulo")
     public void rotinaCertificacoes() {
-        logger.info("Iniciando rotina agendada: Envio de Certificações...");
-        orchestrator.execute();
-        logger.info("Rotina de certificações finalizada.");
+        try {
+            logger.info("Iniciando rotina agendada: Envio de Certificações...");
+            orchestrator.execute();
+            logger.info("Rotina de certificações finalizada.");
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de certificações: {}", e.getMessage(), e);
+        }
     }
 }

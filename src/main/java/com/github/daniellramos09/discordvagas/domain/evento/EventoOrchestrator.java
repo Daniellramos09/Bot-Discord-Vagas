@@ -40,9 +40,10 @@ public class EventoOrchestrator {
     }
 
     public void execute() {
-        List<EventoRecord> records = scraper.scrape();
-        int eventosEnviadosNaRodada = 0;
-        int maximoPorRodada = 2;
+        try {
+            List<EventoRecord> records = scraper.scrape();
+            int eventosEnviadosNaRodada = 0;
+            int maximoPorRodada = 2;
 
         for (EventoRecord record : records) {
             if (eventosEnviadosNaRodada >= maximoPorRodada) {
@@ -81,6 +82,9 @@ public class EventoOrchestrator {
             logger.info("Novo Evento enviado: {}", record.titulo());
 
             sleep(2000);
+        }
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de eventos: {}", e.getMessage(), e);
         }
     }
 

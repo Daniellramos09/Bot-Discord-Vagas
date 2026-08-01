@@ -31,7 +31,7 @@ public class JoobleVagaScraper implements VagaScraper {
 
     public JoobleVagaScraper(RestTemplate restTemplate,
                               ObjectMapper objectMapper,
-                              @Value("${buscardo.vagas.jooble}") String apiKey) {
+                              @Value("${buscador.vagas.jooble}") String apiKey) {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;

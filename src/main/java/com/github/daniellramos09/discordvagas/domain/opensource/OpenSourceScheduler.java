@@ -18,8 +18,12 @@ public class OpenSourceScheduler {
 
     @Scheduled(cron = "0 0 0 * * *", zone = "America/Sao_Paulo")
     public void agendarBuscaOpenSource() {
-        logger.info("Iniciando rotina agendada: Busca de Projetos Open Source...");
-        int encontradas = orchestrator.execute();
-        logger.info("Rotina finalizada. Total de novas issues enviadas: {}", encontradas);
+        try {
+            logger.info("Iniciando rotina agendada: Busca de Projetos Open Source...");
+            int encontradas = orchestrator.execute();
+            logger.info("Rotina finalizada. Total de novas issues enviadas: {}", encontradas);
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de open source: {}", e.getMessage(), e);
+        }
     }
 }

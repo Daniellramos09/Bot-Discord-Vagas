@@ -18,8 +18,12 @@ public class FerramentaScheduler {
 
     @Scheduled(cron = "0 0 9,15 * * *", zone = "America/Sao_Paulo")
     public void rotinaFerramentas() {
-        logger.info("Iniciando rotina agendada: Busca de Ferramentas Open Source...");
-        int encontradas = orchestrator.execute();
-        logger.info("Rotina finalizada. Total de ferramentas enviadas: {}", encontradas);
+        try {
+            logger.info("Iniciando rotina agendada: Busca de Ferramentas Open Source...");
+            int encontradas = orchestrator.execute();
+            logger.info("Rotina finalizada. Total de ferramentas enviadas: {}", encontradas);
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de ferramentas: {}", e.getMessage(), e);
+        }
     }
 }

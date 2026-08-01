@@ -18,8 +18,12 @@ public class EventoScheduler {
 
     @Scheduled(cron = "0 0 0 * * *", zone = "America/Sao_Paulo")
     public void rotinaEventos() {
-        logger.info("Iniciando rotina agendada: Eventos e Hackathons...");
-        orchestrator.execute();
-        logger.info("Rotina de eventos finalizada.");
+        try {
+            logger.info("Iniciando rotina agendada: Eventos e Hackathons...");
+            orchestrator.execute();
+            logger.info("Rotina de eventos finalizada.");
+        } catch (Exception e) {
+            logger.error("Erro ao executar rotina de eventos: {}", e.getMessage(), e);
+        }
     }
 }
