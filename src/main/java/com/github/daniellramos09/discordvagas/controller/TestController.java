@@ -15,9 +15,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+
 @RestController
 @RequestMapping("/api/test")
-@Profile("!prod")
+@Profile("dev")
 public class TestController {
 
     public static final Logger logger = LoggerFactory.getLogger(TestController.class);
@@ -46,17 +49,18 @@ public class TestController {
         this.expectedApiKey = expectedApiKey;
 
         if (expectedApiKey == null || expectedApiKey.isBlank()) {
-            logger.warn("APP_SECURITY_API_KEY nao configurada. Endpoints de teste estao SEM AUTENTICACAO.");
+            logger.warn("APP_SECURITY_API_KEY nao configurada. Endpoints de teste permanecem bloqueados.");
         } else {
             logger.info("APP_SECURITY_API_KEY configurada. Endpoints de teste protegidos.");
         }
     }
 
     private boolean isAuthorized(String apiKey) {
-        if (expectedApiKey == null || expectedApiKey.isBlank()) {
-            return true;
-        }
-        return expectedApiKey.equals(apiKey);
+        return expectedApiKey != null
+                && !expectedApiKey.isBlank()
+                && apiKey != null
+                && MessageDigest.isEqual(expectedApiKey.getBytes(StandardCharsets.UTF_8),
+                apiKey.getBytes(StandardCharsets.UTF_8));
     }
 
     @PostMapping("/run-scraper")
