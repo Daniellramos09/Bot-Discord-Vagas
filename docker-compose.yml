@@ -6,13 +6,11 @@ services:
     container_name: radar-postgres
     restart: always
     environment:
-      POSTGRES_DB: vagasdiscord
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1234
-    ports:
-      - "5432:5432"
+      POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB no arquivo .env}
+      POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER no arquivo .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
     volumes:
-      - postgres_data:/var/lib/postgresql/data # Isso garante que as vagas salvas não sumam se o servidor reiniciar!
+      - postgres_data:/var/lib/postgresql/data
 
   discord-bot:
     build: .
@@ -22,6 +20,13 @@ services:
       - db
     env_file:
       - .env
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DATASOURCE_HOST: db
+      DATASOURCE_PORT: 5432
+      DATASOURCE_DATABASE: ${POSTGRES_DB:?Defina POSTGRES_DB no arquivo .env}
+      DATASOURCE_USERNAME: ${POSTGRES_USER:?Defina POSTGRES_USER no arquivo .env}
+      DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
 
 volumes:
   postgres_data:

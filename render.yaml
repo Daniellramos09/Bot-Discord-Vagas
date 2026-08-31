@@ -1,0 +1,55 @@
+services:
+  - type: worker
+    name: discord-vagas
+    runtime: docker
+    region: oregon
+    plan: 0.5c-512mb
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DATASOURCE_HOST
+        fromDatabase:
+          name: discord-vagas-db
+          property: host
+      - key: DATASOURCE_PORT
+        fromDatabase:
+          name: discord-vagas-db
+          property: port
+      - key: DATASOURCE_DATABASE
+        fromDatabase:
+          name: discord-vagas-db
+          property: database
+      - key: DATASOURCE_USERNAME
+        fromDatabase:
+          name: discord-vagas-db
+          property: user
+      - key: DATASOURCE_PASSWORD
+        fromDatabase:
+          name: discord-vagas-db
+          property: password
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: DISCORD_WEBHOOK_URL
+        sync: false
+      - key: DISCORD_WEBHOOK_URL_OPENSOURCE
+        sync: false
+      - key: DISCORD_WEBHOOK_URL_CERTIFICACAO
+        sync: false
+      - key: DISCORD_WEBHOOK_URL_CURSO
+        sync: false
+      - key: DISCORD_WEBHOOK_URL_EVENTO
+        sync: false
+      - key: DISCORD_WEBHOOK_URL_FERRAMENTAS
+        sync: false
+      - key: BUSCADOR_VAGAS
+        sync: false
+      - key: BUSCADOR_VAGA_SERP
+        sync: false
+      - key: BUSCADOR_VAGA_SERPER
+        sync: false
+
+databases:
+  - name: discord-vagas-db
+    region: oregon
+    plan: free
+    ipAllowList: []

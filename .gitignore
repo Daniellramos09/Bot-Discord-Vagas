@@ -8,8 +8,6 @@ target/
 .env
 .env.local
 .env.*.local
-src/main/resources/application.properties
-!src/main/resources/application.properties.example
 
 ### STS ###
 .apt_generated
