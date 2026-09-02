@@ -16,7 +16,7 @@ public class CertificaoScheduler {
         this.orchestrator = orchestrator;
     }
 
-    @Scheduled(cron = "0 0 10,16 * * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 2,3 * * *", zone = "America/Sao_Paulo")
     public void rotinaCertificacoes() {
         try {
             logger.info("Iniciando rotina agendada: Envio de Certificações...");
