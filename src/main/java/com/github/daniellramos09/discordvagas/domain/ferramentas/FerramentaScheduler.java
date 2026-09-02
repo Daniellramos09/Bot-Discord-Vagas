@@ -16,7 +16,7 @@ public class FerramentaScheduler {
         this.orchestrator = orchestrator;
     }
 
-    @Scheduled(cron = "0 0 9,15 * * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 7,8 * * *", zone = "America/Sao_Paulo")
     public void rotinaFerramentas() {
         try {
             logger.info("Iniciando rotina agendada: Busca de Ferramentas Open Source...");

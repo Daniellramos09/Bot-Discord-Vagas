@@ -16,7 +16,7 @@ public class OpenSourceScheduler {
         this.orchestrator = orchestrator;
     }
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 8 * * *", zone = "America/Sao_Paulo")
     public void agendarBuscaOpenSource() {
         try {
             logger.info("Iniciando rotina agendada: Busca de Projetos Open Source...");

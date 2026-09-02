@@ -16,7 +16,7 @@ public class VagaScheduler {
         this.orchestrator = orchestrator;
     }
 
-    @Scheduled(cron = "0 0 0 * * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 3 * * *", zone = "America/Sao_Paulo")
     public void buscarEProcessarVagas() {
         try {
             orchestrator.execute();

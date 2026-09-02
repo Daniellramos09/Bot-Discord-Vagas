@@ -16,7 +16,7 @@ public class CursoScheduler {
         this.orchestrator = orchestrator;
     }
 
-    @Scheduled(cron = "0 0 12,18 * * *", zone = "America/Sao_Paulo")
+    @Scheduled(cron = "0 0 4,5 * * *", zone = "America/Sao_Paulo")
     public void rotinaCursos() {
         try {
             orchestrator.execute();
