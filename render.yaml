@@ -1,9 +1,13 @@
 services:
-  - type: worker
+  # O processo executa os agendamentos do Spring e tambem responde ao health check
+  # do Render. Mantemos uma unica instancia para evitar execucoes duplicadas.
+  - type: web
     name: discord-vagas
     runtime: docker
     region: oregon
     plan: 0.5c-512mb
+    numInstances: 1
+    healthCheckPath: /health
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
@@ -27,6 +31,10 @@ services:
         fromDatabase:
           name: discord-vagas-db
           property: password
+      - key: JPA_DDL_AUTO
+        value: update
+      - key: JPA_SHOW_SQL
+        value: "false"
       - key: GEMINI_API_KEY
         sync: false
       - key: DISCORD_WEBHOOK_URL
