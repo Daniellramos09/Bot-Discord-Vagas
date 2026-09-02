@@ -12,13 +12,14 @@ Endpoints de busca, URLs de canais do Telegram e o `User-Agent` sao informacoes 
 
 ## Deploy no Render
 
-O `render.yaml` cria um *Background Worker*, nao um Web Service. Assim, o bot permanece em execucao para os agendamentos, mas nao recebe trafego publico e o `TestController` fica desabilitado.
+Este projeto e um Spring Boot com agendamentos (`@EnableScheduling`) e tambem expoe um endpoint de saude em `/health`. Portanto, ele pode ser executado como um Web Service no Render sem alterar a logica de negocio.
 
 1. Envie este repositorio ao GitHub sem o arquivo `.env`.
-2. No Render, crie um Blueprint a partir do repositorio. O arquivo `render.yaml` cria o worker e o PostgreSQL privado.
+2. No Render, crie um Blueprint a partir do repositorio. O arquivo `render.yaml` define um `web` service e um PostgreSQL privado.
 3. Informe, quando solicitado, `GEMINI_API_KEY`, os `DISCORD_WEBHOOK_URL_*` usados e as chaves dos buscadores. Esses valores ficam apenas no Render.
 4. Confirme que o perfil ativo e `prod`, acompanhe os logs e verifique as primeiras execucoes agendadas.
+5. O Render usa a variavel `PORT` para expor a aplicacao, e o app ja faz `server.address=0.0.0.0` e `server.port=${PORT:8080}` para atender essa regra.
 
-O banco fica sem acesso publico (`ipAllowList: []`) e as credenciais dele sao repassadas ao worker somente pela rede interna do Render.
+O banco fica sem acesso publico (`ipAllowList: []`) e as credenciais dele sao repassadas ao servico somente pela rede interna do Render.
 
-> O plano configurado para o worker e `0.5c-512mb`; ele e cobrado pelo Render. Ajuste `plan` em `render.yaml` se necessario antes do primeiro deploy.
+> O plano configurado para o servico e `0.5c-512mb`; ele e cobrado pelo Render. Ajuste `plan` em `render.yaml` se necessario antes do primeiro deploy.
